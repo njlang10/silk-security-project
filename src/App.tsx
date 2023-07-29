@@ -4,7 +4,7 @@ import grouped from "./db/grouped_findings.json";
 import raw from "./db/raw_findings.json";
 import { useEffect, useState } from "react";
 import { Table } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { ColumnsType, ColumnType } from "antd/es/table";
 
 export type Severity = "low" | "medium" | "high" | "critical";
 export type GroupedFinding = {
@@ -41,7 +41,9 @@ export type RawFinding = {
   grouped_finding_id: number;
 };
 
-function getFilterForKey(key: keyof GroupedFinding) {
+function getFilterForKey(
+  key: keyof GroupedFinding
+): ColumnType<GroupedFinding>["filters"] {
   switch (key) {
     case "severity":
       return [
@@ -55,10 +57,12 @@ function getFilterForKey(key: keyof GroupedFinding) {
   return undefined;
 }
 
-function getOnFilterForKey(key: keyof GroupedFinding) {
+function getOnFilterForKey(
+  key: keyof GroupedFinding
+): ColumnType<GroupedFinding>["onFilter"] {
   switch (key) {
     case "severity":
-      return (value: unknown, record: GroupedFinding) => {
+      return (value: string | number | boolean, record: GroupedFinding) => {
         return record.severity === value;
       };
   }
@@ -66,17 +70,17 @@ function getOnFilterForKey(key: keyof GroupedFinding) {
 }
 
 const GROUPED_FINDING_TABLE_COLUMNS: ColumnsType<GroupedFinding> = [
+  "severity",
+  "description",
+  "grouped_finding_created",
+  "sla",
+  "status",
+  "progress",
   "id",
   "grouping_type",
   "grouping_key",
-  "severity",
-  "grouped_finding_created",
-  "sla",
-  "description",
   "security_analyst",
   "workflow",
-  "status",
-  "progress",
 ].map((key) => ({
   title: key,
   dataIndex: key,
@@ -139,7 +143,7 @@ function GroupedFindingTable({
       dataSource={groupedFindings}
       columns={GROUPED_FINDING_TABLE_COLUMNS}
       rowKey={(record) => record.id}
-      scroll={{ x: 1500, y: 250 }}
+      scroll={{ x: 1500 }}
       expandable={{
         expandedRowRender: RawExpansionTable,
         defaultExpandedRowKeys: ["0"],
