@@ -69,6 +69,79 @@ function getOnFilterForKey(
   return undefined;
 }
 
+function UrlCellRenderer(value: string): React.ReactNode {
+  return <a href={value}>{value}</a>;
+}
+
+function DescriptionCellRenderer(value: string): React.ReactNode {
+  const splitText = value.split(":");
+  const link = value.split("Remediation Group:")[1].trim();
+  return (
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      {splitText[0] + ":"}
+      <a href={link}>{link}</a>
+    </div>
+  );
+}
+
+function SeverityCellRenderer(value: Severity): React.ReactNode {
+  let background = "#B4E1FF";
+  switch (value) {
+    case "medium":
+      background = "#AB87FF";
+      break;
+    case "high":
+      background = "#AB87FF";
+      break;
+    case "critical":
+      background = "#BA1200";
+      break;
+    default:
+      background = "#B4E1FF";
+  }
+  return (
+    <span
+      style={{
+        background: background,
+        width: "100%",
+        height: "100%",
+        color: "white",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {value.toLocaleUpperCase()}
+    </span>
+  );
+}
+
+function getGroupedFindingCellRenderer(
+  key: keyof GroupedFinding
+): ColumnType<GroupedFinding>["render"] {
+  switch (key) {
+    case "severity":
+      return SeverityCellRenderer;
+    case "grouping_key":
+      return UrlCellRenderer;
+    case "description":
+      return DescriptionCellRenderer;
+  }
+
+  return undefined;
+}
+
+function getRawFindingCellRenderer(
+  key: keyof RawFinding
+): ColumnType<RawFinding>["render"] {
+  switch (key) {
+    case "remediation_url":
+      return UrlCellRenderer;
+  }
+
+  return undefined;
+}
+
 const GROUPED_FINDING_TABLE_COLUMNS: ColumnsType<GroupedFinding> = [
   "severity",
   "description",
@@ -87,6 +160,7 @@ const GROUPED_FINDING_TABLE_COLUMNS: ColumnsType<GroupedFinding> = [
   key,
   filters: getFilterForKey(key as keyof GroupedFinding),
   onFilter: getOnFilterForKey(key as keyof GroupedFinding),
+  render: getGroupedFindingCellRenderer(key as keyof GroupedFinding),
 }));
 
 const RAW_FINDINGS_TABLE_COLUMNS: ColumnsType<RawFinding> = [
@@ -108,6 +182,7 @@ const RAW_FINDINGS_TABLE_COLUMNS: ColumnsType<RawFinding> = [
   title: key,
   dataIndex: key,
   key,
+  render: getRawFindingCellRenderer(key as keyof RawFinding),
 }));
 
 function GroupedFindingTable({
@@ -143,7 +218,7 @@ function GroupedFindingTable({
       dataSource={groupedFindings}
       columns={GROUPED_FINDING_TABLE_COLUMNS}
       rowKey={(record) => record.id}
-      scroll={{ x: 1500 }}
+      scroll={{ x: 1500, y: 500 }}
       expandable={{
         expandedRowRender: RawExpansionTable,
         defaultExpandedRowKeys: ["0"],
