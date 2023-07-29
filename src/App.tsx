@@ -5,6 +5,8 @@ import raw from "./db/raw_findings.json";
 import { useEffect, useState } from "react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
+
+export type Severity = "low" | "medium" | "high" | "critical";
 export type GroupedFinding = {
   id: number;
   grouping_type: string;
@@ -39,6 +41,30 @@ export type RawFinding = {
   grouped_finding_id: number;
 };
 
+function getFilterForKey(key: keyof GroupedFinding) {
+  switch (key) {
+    case "severity":
+      return [
+        { text: "low", value: "low" },
+        { text: "medium", value: "medium" },
+        { text: "high", value: "high" },
+        { text: "critical", value: "critical" },
+      ];
+  }
+
+  return undefined;
+}
+
+function getOnFilterForKey(key: keyof GroupedFinding) {
+  switch (key) {
+    case "severity":
+      return (value: unknown, record: GroupedFinding) => {
+        return record.severity === value;
+      };
+  }
+  return undefined;
+}
+
 const GROUPED_FINDING_TABLE_COLUMNS: ColumnsType<GroupedFinding> = [
   "id",
   "grouping_type",
@@ -55,6 +81,8 @@ const GROUPED_FINDING_TABLE_COLUMNS: ColumnsType<GroupedFinding> = [
   title: key,
   dataIndex: key,
   key,
+  filters: getFilterForKey(key as keyof GroupedFinding),
+  onFilter: getOnFilterForKey(key as keyof GroupedFinding),
 }));
 
 const RAW_FINDINGS_TABLE_COLUMNS: ColumnsType<RawFinding> = [
@@ -111,6 +139,7 @@ function GroupedFindingTable({
       dataSource={groupedFindings}
       columns={GROUPED_FINDING_TABLE_COLUMNS}
       rowKey={(record) => record.id}
+      scroll={{ x: 1500, y: 250 }}
       expandable={{
         expandedRowRender: RawExpansionTable,
         defaultExpandedRowKeys: ["0"],
@@ -127,9 +156,8 @@ export default function App() {
   }, []);
   return (
     <div className="App">
-      <h1>Hello CodeSandbox</h1>
+      <h1>Grouped Findings Dashboard</h1>
       <GroupedFindingTable groupedFindings={groupedFindings} />
-      <h2>Start editing to see some magic happen!</h2>
     </div>
   );
 }
