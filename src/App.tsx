@@ -87,25 +87,24 @@ function DescriptionCellRenderer(value: string): React.ReactNode {
   );
 }
 
-function SeverityCellRenderer(value: Severity): React.ReactNode {
-  let background = "#B4E1FF";
-  switch (value) {
+function getColorForSeverity(severity: Severity): React.CSSProperties["color"] {
+  switch (severity) {
+    case "low":
+      return "#F2F3AE";
     case "medium":
-      background = "#AB87FF";
-      break;
+      return "#EDD382";
     case "high":
-      background = "#AB87FF";
-      break;
+      return "#FC9E4F";
     case "critical":
-      background = "#BA1200";
-      break;
-    default:
-      background = "#B4E1FF";
+      return "#FF521B";
   }
+}
+
+function SeverityCellRenderer(value: Severity): React.ReactNode {
   return (
     <span
       style={{
-        background: background,
+        background: getColorForSeverity(value),
         width: "100%",
         height: "100%",
         color: "white",
@@ -236,6 +235,7 @@ function PieChart({ data }: { data: PieChartData[] }): JSX.Element {
       data={data}
       height={500}
       legends={[]}
+      colors={{ datum: "data.color" }}
       margin={{
         bottom: 80,
         left: 120,
@@ -243,6 +243,9 @@ function PieChart({ data }: { data: PieChartData[] }): JSX.Element {
         top: 80,
       }}
       width={900}
+      onClick={(datum) => {
+        console.log("datum", datum);
+      }}
     />
   );
 }
@@ -267,6 +270,7 @@ export default function App() {
         id: severity,
         label: severity,
         value: amt,
+        color: getColorForSeverity(severity as Severity),
       };
     });
   }, [groupedFindings]);
