@@ -2,10 +2,16 @@ import "./styles.css";
 import React from "react";
 import grouped from "./db/grouped_findings.json";
 import raw from "./db/raw_findings.json";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Table } from "antd";
 import type { ColumnsType, ColumnType } from "antd/es/table";
+import { Pie } from "@nivo/pie";
 
+export type PieChartData = {
+  id: string;
+  label: string;
+  value: string | number;
+};
 export type Severity = "low" | "medium" | "high" | "critical";
 export type GroupedFinding = {
   id: number;
@@ -21,9 +27,6 @@ export type GroupedFinding = {
   progress: number;
 };
 
-/**
- * id INTEGER PRIMARY KEY, source_security_tool_name TEXT, source_security_tool_id TEXT, source_collaboration_tool_name TEXT, source_collaboration_tool_id TEXT, severity TEXT, finding_created TEXT, ticket_created TEXT, description TEXT, asset TEXT, status TEX, remediation_url TEXT, remediation_text TEXT, grouped_finding_id INTEGER)
- */
 export type RawFinding = {
   id: number;
   source_security_tool_name: string;
@@ -227,8 +230,46 @@ function GroupedFindingTable({
   );
 }
 
+function PieChart({ data }: { data: PieChartData[] }): JSX.Element {
+  return (
+    <Pie
+      data={data}
+      height={500}
+      legends={[]}
+      margin={{
+        bottom: 80,
+        left: 120,
+        right: 120,
+        top: 80,
+      }}
+      width={900}
+    />
+  );
+}
+
 export default function App() {
   const [groupedFindings, setGroupedFindings] = useState<GroupedFinding[]>([]);
+  const findingsAnalyzed = useMemo(() => {
+    const grouped = groupedFindings?.reduce<{ [key: string]: number }>(
+      (accum, current) => {
+        const existingNumber = accum?.[current.severity];
+        if (existingNumber != null) {
+          accum[current.severity] = existingNumber + 1;
+        } else {
+          accum[current.severity] = 1;
+        }
+        return accum;
+      },
+      {}
+    );
+    return Object.entries(grouped).map(([severity, amt]) => {
+      return {
+        id: severity,
+        label: severity,
+        value: amt,
+      };
+    });
+  }, [groupedFindings]);
 
   useEffect(() => {
     setGroupedFindings(grouped);
@@ -236,7 +277,17 @@ export default function App() {
   return (
     <div className="App">
       <h1>Grouped Findings Dashboard</h1>
-      <GroupedFindingTable groupedFindings={groupedFindings} />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        <GroupedFindingTable groupedFindings={groupedFindings} />
+        <PieChart data={findingsAnalyzed} />
+      </div>
     </div>
   );
 }
