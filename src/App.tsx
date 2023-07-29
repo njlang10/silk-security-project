@@ -78,34 +78,57 @@ const RAW_FINDINGS_TABLE_COLUMNS: ColumnsType<RawFinding> = [
   key,
 }));
 
-function RawFindingsTable({ data }: { data: RawFinding[] }): JSX.Element {
-  return <Table dataSource={data} columns={RAW_FINDINGS_TABLE_COLUMNS} />;
-}
-
 function GroupedFindingTable({
-  data,
+  groupedFindings,
 }: {
-  data: GroupedFinding[];
+  groupedFindings: GroupedFinding[];
 }): JSX.Element {
-  return <Table dataSource={data} columns={GROUPED_FINDING_TABLE_COLUMNS} />;
+  const [rawFindings, setRawFindings] = useState<RawFinding[]>([]);
+  useEffect(() => {
+    setRawFindings(raw);
+  }, []);
+
+  function RawExpansionTable(
+    record: GroupedFinding & { [key: string]: unknown }
+  ): React.ReactNode {
+    const groupedId = record.id;
+
+    const filtered = rawFindings.filter(
+      (finding) => finding.grouped_finding_id === groupedId
+    );
+    return (
+      <Table
+        dataSource={filtered}
+        columns={RAW_FINDINGS_TABLE_COLUMNS}
+        pagination={false}
+        rowKey={(record) => record.id}
+      />
+    );
+  }
+
+  return (
+    <Table
+      dataSource={groupedFindings}
+      columns={GROUPED_FINDING_TABLE_COLUMNS}
+      rowKey={(record) => record.id}
+      expandable={{
+        expandedRowRender: RawExpansionTable,
+        defaultExpandedRowKeys: ["0"],
+      }}
+    />
+  );
 }
 
 export default function App() {
   const [groupedFindings, setGroupedFindings] = useState<GroupedFinding[]>([]);
-  const [rawFindings, setRawFindings] = useState<RawFinding[]>([]);
 
   useEffect(() => {
     setGroupedFindings(grouped);
   }, []);
-
-  useEffect(() => {
-    setRawFindings(raw);
-  }, []);
   return (
     <div className="App">
       <h1>Hello CodeSandbox</h1>
-      <GroupedFindingTable data={groupedFindings} />
-      <RawFindingsTable data={rawFindings} />
+      <GroupedFindingTable groupedFindings={groupedFindings} />
       <h2>Start editing to see some magic happen!</h2>
     </div>
   );
