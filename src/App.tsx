@@ -249,7 +249,7 @@ function PieChart<PieChartData>({
   return (
     <Pie
       data={data}
-      height={500}
+      height={350}
       legends={[]}
       colors={{ datum: "data.color" }}
       margin={{
@@ -317,13 +317,13 @@ export default function App() {
           height: "100%",
         }}
       >
-        <GroupedFindingTable
-          groupedFindings={groupedFindings}
-          filterToSeverity={selectedSeverity}
-        />
         <PieChart
           data={findingsAnalyzed}
           onSectionClick={onPieSectionClicked}
+        />
+        <GroupedFindingTable
+          groupedFindings={groupedFindings}
+          filterToSeverity={selectedSeverity}
         />
       </div>
     </div>
