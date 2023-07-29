@@ -189,10 +189,20 @@ const RAW_FINDINGS_TABLE_COLUMNS: ColumnsType<RawFinding> = [
 
 function GroupedFindingTable({
   groupedFindings,
+  filterToSeverity = null,
 }: {
   groupedFindings: GroupedFinding[];
+  filterToSeverity?: Severity | null;
 }): JSX.Element {
   const [rawFindings, setRawFindings] = useState<RawFinding[]>([]);
+  const filteredFindings = useMemo(() => {
+    if (filterToSeverity !== null) {
+      return groupedFindings.filter(
+        (finding) => finding.severity === filterToSeverity
+      );
+    }
+    return groupedFindings;
+  }, [filterToSeverity, groupedFindings]);
   useEffect(() => {
     setRawFindings(raw);
   }, []);
@@ -217,7 +227,7 @@ function GroupedFindingTable({
 
   return (
     <Table
-      dataSource={groupedFindings}
+      dataSource={filteredFindings}
       columns={GROUPED_FINDING_TABLE_COLUMNS}
       rowKey={(record) => record.id}
       scroll={{ x: 1500, y: 500 }}
@@ -229,7 +239,13 @@ function GroupedFindingTable({
   );
 }
 
-function PieChart({ data }: { data: PieChartData[] }): JSX.Element {
+function PieChart<PieChartData>({
+  data,
+  onSectionClick = () => {},
+}: {
+  data: PieChartData[];
+  onSectionClick?: (severity: Severity, amount: number) => void;
+}): JSX.Element {
   return (
     <Pie
       data={data}
@@ -244,13 +260,16 @@ function PieChart({ data }: { data: PieChartData[] }): JSX.Element {
       }}
       width={900}
       onClick={(datum) => {
-        console.log("datum", datum);
+        onSectionClick(datum.label as Severity, datum.value);
       }}
     />
   );
 }
 
 export default function App() {
+  const [selectedSeverity, setSelectedSeverity] = useState<Severity | null>(
+    null
+  );
   const [groupedFindings, setGroupedFindings] = useState<GroupedFinding[]>([]);
   const findingsAnalyzed = useMemo(() => {
     const grouped = groupedFindings?.reduce<{ [key: string]: number }>(
@@ -278,6 +297,15 @@ export default function App() {
   useEffect(() => {
     setGroupedFindings(grouped);
   }, []);
+
+  function onPieSectionClicked(severity: Severity): void {
+    if (selectedSeverity === severity) {
+      setSelectedSeverity(null);
+      return;
+    }
+    setSelectedSeverity(severity);
+  }
+
   return (
     <div className="App">
       <h1>Grouped Findings Dashboard</h1>
@@ -289,8 +317,14 @@ export default function App() {
           height: "100%",
         }}
       >
-        <GroupedFindingTable groupedFindings={groupedFindings} />
-        <PieChart data={findingsAnalyzed} />
+        <GroupedFindingTable
+          groupedFindings={groupedFindings}
+          filterToSeverity={selectedSeverity}
+        />
+        <PieChart
+          data={findingsAnalyzed}
+          onSectionClick={onPieSectionClicked}
+        />
       </div>
     </div>
   );
