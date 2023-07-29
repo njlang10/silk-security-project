@@ -1,6 +1,7 @@
 import "./styles.css";
 import React from "react";
 import grouped from "./db/grouped_findings.json";
+import raw from "./db/raw_findings.json";
 import { useEffect, useState } from "react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -35,7 +36,7 @@ export type RawFinding = {
   status: string;
   remediation_url: string;
   remediation_text: string;
-  grouped_finding_id: string;
+  grouped_finding_id: number;
 };
 
 const GROUPED_FINDING_TABLE_COLUMNS: ColumnsType<GroupedFinding> = [
@@ -77,26 +78,34 @@ const RAW_FINDINGS_TABLE_COLUMNS: ColumnsType<RawFinding> = [
   key,
 }));
 
+function RawFindingsTable({ data }: { data: RawFinding[] }): JSX.Element {
+  return <Table dataSource={data} columns={RAW_FINDINGS_TABLE_COLUMNS} />;
+}
+
 function GroupedFindingTable({
   data,
 }: {
   data: GroupedFinding[];
 }): JSX.Element {
-  console.log("data", data);
-  console.log("columns", GROUPED_FINDING_TABLE_COLUMNS);
   return <Table dataSource={data} columns={GROUPED_FINDING_TABLE_COLUMNS} />;
 }
 
 export default function App() {
   const [groupedFindings, setGroupedFindings] = useState<GroupedFinding[]>([]);
+  const [rawFindings, setRawFindings] = useState<RawFinding[]>([]);
 
   useEffect(() => {
     setGroupedFindings(grouped);
+  }, []);
+
+  useEffect(() => {
+    setRawFindings(raw);
   }, []);
   return (
     <div className="App">
       <h1>Hello CodeSandbox</h1>
       <GroupedFindingTable data={groupedFindings} />
+      <RawFindingsTable data={rawFindings} />
       <h2>Start editing to see some magic happen!</h2>
     </div>
   );
