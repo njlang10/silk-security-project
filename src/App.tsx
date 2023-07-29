@@ -44,6 +44,33 @@ export type RawFinding = {
   grouped_finding_id: number;
 };
 
+function getSeveritySort(severity: Severity): number {
+  switch (severity) {
+    case "low":
+      return 0;
+    case "medium":
+      return 1;
+    case "high":
+      return 2;
+    case "critical":
+      return 3;
+  }
+}
+
+function pieSorter(a: PieChartData, b: PieChartData): number {
+  return getSeveritySort(a.label as Severity) <
+    getSeveritySort(b.label as Severity)
+    ? -1
+    : 1;
+}
+
+function tableDefaultSort(a: GroupedFinding, b: GroupedFinding): number {
+  return getSeveritySort(a.severity as Severity) <
+    getSeveritySort(b.severity as Severity)
+    ? 1
+    : -1;
+}
+
 function getFilterForKey(
   key: keyof GroupedFinding
 ): ColumnType<GroupedFinding>["filters"] {
@@ -73,7 +100,11 @@ function getOnFilterForKey(
 }
 
 function UrlCellRenderer(value: string): React.ReactNode {
-  return <a href={value}>{value}</a>;
+  return (
+    <a href={value} target="_blank" rel="noreferrer">
+      {value}
+    </a>
+  );
 }
 
 function DescriptionCellRenderer(value: string): React.ReactNode {
@@ -82,7 +113,9 @@ function DescriptionCellRenderer(value: string): React.ReactNode {
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       {splitText[0] + ":"}
-      <a href={link}>{link}</a>
+      <a href={link} target="_blank" rel="noreferrer">
+        {link}
+      </a>
     </div>
   );
 }
@@ -227,7 +260,7 @@ function GroupedFindingTable({
 
   return (
     <Table
-      dataSource={filteredFindings}
+      dataSource={filteredFindings.sort(tableDefaultSort)}
       columns={GROUPED_FINDING_TABLE_COLUMNS}
       rowKey={(record) => record.id}
       scroll={{ x: 1500, y: 500 }}
@@ -239,7 +272,7 @@ function GroupedFindingTable({
   );
 }
 
-function PieChart<PieChartData>({
+function PieChart({
   data,
   onSectionClick = () => {},
 }: {
@@ -248,10 +281,36 @@ function PieChart<PieChartData>({
 }): JSX.Element {
   return (
     <Pie
-      data={data}
+      data={data.sort(pieSorter)}
       height={350}
-      legends={[]}
+      legends={[
+        {
+          anchor: "bottom",
+          direction: "row",
+          justify: false,
+          translateX: 0,
+          translateY: 50,
+          itemsSpacing: 0,
+          itemWidth: 100,
+          itemHeight: 18,
+          itemTextColor: "#999",
+          itemDirection: "left-to-right",
+          itemOpacity: 1,
+          symbolSize: 18,
+          symbolShape: "circle",
+          effects: [
+            {
+              on: "hover",
+              style: {
+                itemTextColor: "#000",
+              },
+            },
+          ],
+        },
+      ]}
       colors={{ datum: "data.color" }}
+      arcLinkLabelsStraightLength={0}
+      arcLinkLabelsDiagonalLength={36}
       margin={{
         bottom: 80,
         left: 120,
