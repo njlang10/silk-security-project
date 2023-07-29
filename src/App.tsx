@@ -2,10 +2,16 @@ import "./styles.css";
 import React from "react";
 import grouped from "./db/grouped_findings.json";
 import raw from "./db/raw_findings.json";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Table } from "antd";
 import type { ColumnsType, ColumnType } from "antd/es/table";
+import { Pie } from "@nivo/pie";
 
+export type PieChartData = {
+  id: string;
+  label: string;
+  value: string | number;
+};
 export type Severity = "low" | "medium" | "high" | "critical";
 export type GroupedFinding = {
   id: number;
@@ -21,9 +27,6 @@ export type GroupedFinding = {
   progress: number;
 };
 
-/**
- * id INTEGER PRIMARY KEY, source_security_tool_name TEXT, source_security_tool_id TEXT, source_collaboration_tool_name TEXT, source_collaboration_tool_id TEXT, severity TEXT, finding_created TEXT, ticket_created TEXT, description TEXT, asset TEXT, status TEX, remediation_url TEXT, remediation_text TEXT, grouped_finding_id INTEGER)
- */
 export type RawFinding = {
   id: number;
   source_security_tool_name: string;
@@ -69,6 +72,78 @@ function getOnFilterForKey(
   return undefined;
 }
 
+function UrlCellRenderer(value: string): React.ReactNode {
+  return <a href={value}>{value}</a>;
+}
+
+function DescriptionCellRenderer(value: string): React.ReactNode {
+  const splitText = value.split(":");
+  const link = value.split("Remediation Group:")[1].trim();
+  return (
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      {splitText[0] + ":"}
+      <a href={link}>{link}</a>
+    </div>
+  );
+}
+
+function getColorForSeverity(severity: Severity): React.CSSProperties["color"] {
+  switch (severity) {
+    case "low":
+      return "#F2F3AE";
+    case "medium":
+      return "#EDD382";
+    case "high":
+      return "#FC9E4F";
+    case "critical":
+      return "#FF521B";
+  }
+}
+
+function SeverityCellRenderer(value: Severity): React.ReactNode {
+  return (
+    <span
+      style={{
+        background: getColorForSeverity(value),
+        width: "100%",
+        height: "100%",
+        color: "white",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {value.toLocaleUpperCase()}
+    </span>
+  );
+}
+
+function getGroupedFindingCellRenderer(
+  key: keyof GroupedFinding
+): ColumnType<GroupedFinding>["render"] {
+  switch (key) {
+    case "severity":
+      return SeverityCellRenderer;
+    case "grouping_key":
+      return UrlCellRenderer;
+    case "description":
+      return DescriptionCellRenderer;
+  }
+
+  return undefined;
+}
+
+function getRawFindingCellRenderer(
+  key: keyof RawFinding
+): ColumnType<RawFinding>["render"] {
+  switch (key) {
+    case "remediation_url":
+      return UrlCellRenderer;
+  }
+
+  return undefined;
+}
+
 const GROUPED_FINDING_TABLE_COLUMNS: ColumnsType<GroupedFinding> = [
   "severity",
   "description",
@@ -87,6 +162,7 @@ const GROUPED_FINDING_TABLE_COLUMNS: ColumnsType<GroupedFinding> = [
   key,
   filters: getFilterForKey(key as keyof GroupedFinding),
   onFilter: getOnFilterForKey(key as keyof GroupedFinding),
+  render: getGroupedFindingCellRenderer(key as keyof GroupedFinding),
 }));
 
 const RAW_FINDINGS_TABLE_COLUMNS: ColumnsType<RawFinding> = [
@@ -108,6 +184,7 @@ const RAW_FINDINGS_TABLE_COLUMNS: ColumnsType<RawFinding> = [
   title: key,
   dataIndex: key,
   key,
+  render: getRawFindingCellRenderer(key as keyof RawFinding),
 }));
 
 function GroupedFindingTable({
@@ -143,7 +220,7 @@ function GroupedFindingTable({
       dataSource={groupedFindings}
       columns={GROUPED_FINDING_TABLE_COLUMNS}
       rowKey={(record) => record.id}
-      scroll={{ x: 1500 }}
+      scroll={{ x: 1500, y: 500 }}
       expandable={{
         expandedRowRender: RawExpansionTable,
         defaultExpandedRowKeys: ["0"],
@@ -152,8 +229,51 @@ function GroupedFindingTable({
   );
 }
 
+function PieChart({ data }: { data: PieChartData[] }): JSX.Element {
+  return (
+    <Pie
+      data={data}
+      height={500}
+      legends={[]}
+      colors={{ datum: "data.color" }}
+      margin={{
+        bottom: 80,
+        left: 120,
+        right: 120,
+        top: 80,
+      }}
+      width={900}
+      onClick={(datum) => {
+        console.log("datum", datum);
+      }}
+    />
+  );
+}
+
 export default function App() {
   const [groupedFindings, setGroupedFindings] = useState<GroupedFinding[]>([]);
+  const findingsAnalyzed = useMemo(() => {
+    const grouped = groupedFindings?.reduce<{ [key: string]: number }>(
+      (accum, current) => {
+        const existingNumber = accum?.[current.severity];
+        if (existingNumber != null) {
+          accum[current.severity] = existingNumber + 1;
+        } else {
+          accum[current.severity] = 1;
+        }
+        return accum;
+      },
+      {}
+    );
+    return Object.entries(grouped).map(([severity, amt]) => {
+      return {
+        id: severity,
+        label: severity,
+        value: amt,
+        color: getColorForSeverity(severity as Severity),
+      };
+    });
+  }, [groupedFindings]);
 
   useEffect(() => {
     setGroupedFindings(grouped);
@@ -161,7 +281,17 @@ export default function App() {
   return (
     <div className="App">
       <h1>Grouped Findings Dashboard</h1>
-      <GroupedFindingTable groupedFindings={groupedFindings} />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        <GroupedFindingTable groupedFindings={groupedFindings} />
+        <PieChart data={findingsAnalyzed} />
+      </div>
     </div>
   );
 }
