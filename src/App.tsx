@@ -73,7 +73,7 @@ function tableDefaultSort(a: GroupedFinding, b: GroupedFinding): number {
 
 function getFilterForKey(
   key: keyof GroupedFinding
-): ColumnType<GroupedFinding>["filters"] {
+): ColumnType<GroupedFinding>["filters"] | undefined {
   switch (key) {
     case "severity":
       return [
@@ -89,7 +89,7 @@ function getFilterForKey(
 
 function getOnFilterForKey(
   key: keyof GroupedFinding
-): ColumnType<GroupedFinding>["onFilter"] {
+): ColumnType<GroupedFinding>["onFilter"] | undefined {
   switch (key) {
     case "severity":
       return (value: string | number | boolean, record: GroupedFinding) => {
