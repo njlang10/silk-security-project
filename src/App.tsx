@@ -3,9 +3,10 @@ import React from "react";
 import grouped from "./db/grouped_findings.json";
 import raw from "./db/raw_findings.json";
 import { useEffect, useState, useMemo } from "react";
-import { Table } from "antd";
+import { Row, Table, Typography } from "antd";
 import type { ColumnsType, ColumnType } from "antd/es/table";
 import { Pie } from "@nivo/pie";
+import logo from "./assets/silk.png";
 
 export type PieChartData = {
   id: string;
@@ -102,7 +103,7 @@ function getOnFilterForKey(
 function UrlCellRenderer(value: string): React.ReactNode {
   return (
     <a href={value} target="_blank" rel="noreferrer">
-      {value}
+      {"Link To Docs"}
     </a>
   );
 }
@@ -111,12 +112,9 @@ function DescriptionCellRenderer(value: string): React.ReactNode {
   const splitText = value.split(":");
   const link = value.split("Remediation Group:")[1].trim();
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      {splitText[0] + ":"}
-      <a href={link} target="_blank" rel="noreferrer">
-        {link}
-      </a>
-    </div>
+    <a href={link} target="_blank" rel="noreferrer">
+      {splitText[0]}
+    </a>
   );
 }
 
@@ -275,14 +273,20 @@ function GroupedFindingTable({
 function PieChart({
   data,
   onSectionClick = () => {},
+  onMouseEnter = () => {},
+  onMouseLeave = () => {},
 }: {
   data: PieChartData[];
   onSectionClick?: (severity: Severity, amount: number) => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }): JSX.Element {
   return (
     <Pie
       data={data.sort(pieSorter)}
       height={350}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       legends={[
         {
           anchor: "bottom",
@@ -329,6 +333,7 @@ export default function App() {
   const [selectedSeverity, setSelectedSeverity] = useState<Severity | null>(
     null
   );
+  const [showPieDirections, setShowPieDirections] = useState<boolean>(false);
   const [groupedFindings, setGroupedFindings] = useState<GroupedFinding[]>([]);
   const findingsAnalyzed = useMemo(() => {
     const grouped = groupedFindings?.reduce<{ [key: string]: number }>(
@@ -367,7 +372,15 @@ export default function App() {
 
   return (
     <div className="App">
-      <h1>Grouped Findings Dashboard</h1>
+      <Row justify={"space-between"}>
+        <img
+          src={logo}
+          style={{ height: "50px", width: "100px", top: "25px" }}
+        />
+        <Typography.Title level={5} style={{ margin: 0, paddingTop: 10 }}>
+          Grouped Findings Dashboard
+        </Typography.Title>
+      </Row>
       <div
         style={{
           display: "flex",
@@ -376,10 +389,29 @@ export default function App() {
           height: "100%",
         }}
       >
-        <PieChart
-          data={findingsAnalyzed}
-          onSectionClick={onPieSectionClicked}
-        />
+        <div style={{ position: "relative", width: "100%", height: "100%" }}>
+          <PieChart
+            data={findingsAnalyzed}
+            onSectionClick={onPieSectionClicked}
+            onMouseEnter={() => setShowPieDirections(true)}
+            onMouseLeave={() => setShowPieDirections(false)}
+          />
+          {showPieDirections && (
+            <Typography.Text
+              italic
+              style={{
+                position: "absolute",
+                top: "125px",
+                left: "25px",
+                transform: "",
+              }}
+            >
+              {selectedSeverity === null
+                ? "Click Pie to Filter"
+                : `Filtered to ${selectedSeverity.toLocaleUpperCase()} \n. Click again to remove filter`}
+            </Typography.Text>
+          )}
+        </div>
         <GroupedFindingTable
           groupedFindings={groupedFindings}
           filterToSeverity={selectedSeverity}
