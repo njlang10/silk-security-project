@@ -58,6 +58,10 @@ const RAW_FINDINGS_TABLE_COLUMNS: ColumnsType<RawFinding> = [
   render: getRawFindingCellRenderer(key as keyof RawFinding),
 }));
 
+/**
+ * An expandable table component, to show both the Grouped Findings, and the linked Raw Findings
+ * when expanded.
+ */
 export function GroupedFindingTable({
   groupedFindings,
   filterToSeverity = null,

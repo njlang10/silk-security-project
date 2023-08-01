@@ -8,6 +8,9 @@ import { Severity, GroupedFinding, getColorForSeverity } from "./db/data_utils";
 import grouped from "./db/grouped_findings.json";
 import logo from "./assets/silk.png";
 
+/**
+ * APP ENTRY POINT!
+ */
 export default function App() {
   // Local state
   const [selectedSeverity, setSelectedSeverity] = useState<Severity | null>(

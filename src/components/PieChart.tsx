@@ -8,6 +8,9 @@ type PieChartData = {
   value: string | number;
 };
 
+/**
+ * A simple pie chart for showing the distribution of findings by Severity
+ */
 export function PieChart({
   data,
   onSectionClick = () => {},
