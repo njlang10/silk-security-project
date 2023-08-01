@@ -65,7 +65,10 @@ export function GroupedFindingTable({
   groupedFindings: GroupedFinding[];
   filterToSeverity?: Severity | null;
 }): JSX.Element {
+  // Local State
   const [rawFindings, setRawFindings] = useState<RawFinding[]>([]);
+
+  // Derived State
   const filteredFindings = useMemo(() => {
     if (filterToSeverity !== null) {
       return groupedFindings.filter(
@@ -74,10 +77,13 @@ export function GroupedFindingTable({
     }
     return groupedFindings;
   }, [filterToSeverity, groupedFindings]);
+
+  // Effects
   useEffect(() => {
     setRawFindings(raw);
   }, []);
 
+  // Helpers
   function RawExpansionTable(
     record: GroupedFinding & { [key: string]: unknown }
   ): React.ReactNode {
@@ -110,6 +116,7 @@ export function GroupedFindingTable({
   );
 }
 
+// Utilities
 function tableDefaultSort(a: GroupedFinding, b: GroupedFinding): number {
   return getSeveritySort(a.severity as Severity) <
     getSeveritySort(b.severity as Severity)
