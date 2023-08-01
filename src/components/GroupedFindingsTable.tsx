@@ -111,7 +111,7 @@ export function GroupedFindingTable({
       dataSource={filteredFindings.sort(tableDefaultSort)}
       columns={GROUPED_FINDING_TABLE_COLUMNS}
       rowKey={(record) => record.id}
-      scroll={{ x: 1500, y: 500 }}
+      scroll={{ x: 1500, y: 530 }}
       expandable={{
         expandedRowRender: RawExpansionTable,
         defaultExpandedRowKeys: ["0"],
