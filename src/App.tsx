@@ -396,7 +396,7 @@ export default function App() {
             onMouseEnter={() => setShowPieDirections(true)}
             onMouseLeave={() => setShowPieDirections(false)}
           />
-          {showPieDirections && (
+          {(showPieDirections === true || selectedSeverity !== null) && (
             <Typography.Text
               italic
               style={{
