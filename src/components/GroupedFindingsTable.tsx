@@ -58,6 +58,10 @@ const RAW_FINDINGS_TABLE_COLUMNS: ColumnsType<RawFinding> = [
   render: getRawFindingCellRenderer(key as keyof RawFinding),
 }));
 
+/**
+ * An expandable table component, to show both the Grouped Findings, and the linked Raw Findings
+ * when expanded.
+ */
 export function GroupedFindingTable({
   groupedFindings,
   filterToSeverity = null,
@@ -65,7 +69,10 @@ export function GroupedFindingTable({
   groupedFindings: GroupedFinding[];
   filterToSeverity?: Severity | null;
 }): JSX.Element {
+  // Local State
   const [rawFindings, setRawFindings] = useState<RawFinding[]>([]);
+
+  // Derived State
   const filteredFindings = useMemo(() => {
     if (filterToSeverity !== null) {
       return groupedFindings.filter(
@@ -74,10 +81,13 @@ export function GroupedFindingTable({
     }
     return groupedFindings;
   }, [filterToSeverity, groupedFindings]);
+
+  // Effects
   useEffect(() => {
     setRawFindings(raw);
   }, []);
 
+  // Helpers
   function RawExpansionTable(
     record: GroupedFinding & { [key: string]: unknown }
   ): React.ReactNode {
@@ -101,7 +111,7 @@ export function GroupedFindingTable({
       dataSource={filteredFindings.sort(tableDefaultSort)}
       columns={GROUPED_FINDING_TABLE_COLUMNS}
       rowKey={(record) => record.id}
-      scroll={{ x: 1500, y: 500 }}
+      scroll={{ x: 1500, y: 530 }}
       expandable={{
         expandedRowRender: RawExpansionTable,
         defaultExpandedRowKeys: ["0"],
@@ -110,6 +120,7 @@ export function GroupedFindingTable({
   );
 }
 
+// Utilities
 function tableDefaultSort(a: GroupedFinding, b: GroupedFinding): number {
   return getSeveritySort(a.severity as Severity) <
     getSeveritySort(b.severity as Severity)
