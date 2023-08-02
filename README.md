@@ -10,5 +10,6 @@ This is the FE for the Grouped Findings Dashboard. It allows for:
 - Pagination
 
 
-## Notes
+## Notes and Assumptions
 - This uses JSON files in place a a backend URL, but a backend URL could easily be swapped into the `useEffect()` calls to retrieve data from the backend (see https://github.com/njlang10/ss-mini-project-findings for BE code)
+- Most data (with exception of the links) has been unabridged, but this could be changed depending on the user of the tool (for example, dates could be formatted nicer, or progress could be rounded)
