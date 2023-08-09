@@ -1,4 +1,32 @@
-.App {
+#app-root {
   font-family: sans-serif;
   text-align: center;
+}
+
+body {
+  margin: 0px;
+}
+
+#app-root.dark
+  :not(button):not(.ant-switch-inner):not(.ant-switch-handle):not(a):not(
+    .ant-progress-inner
+  ) {
+  background-color: #252525;
+  color: white;
+}
+
+#app-root.dark .ant-pagination-item a {
+  color: white;
+}
+
+#app-root.dark text {
+  color: white;
+}
+
+#app-root.dark .ant-progress-inner {
+  background-color: white;
+}
+
+#app-root.dark svg > g > text {
+  fill: white;
 }

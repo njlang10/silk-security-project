@@ -46,7 +46,7 @@ export function PieChart({
             itemsSpacing: 0,
             itemWidth: 100,
             itemHeight: 18,
-            itemTextColor: "#999",
+            itemTextColor: "#1777FF",
             itemDirection: "left-to-right",
             itemOpacity: 1,
             symbolSize: 18,
@@ -63,6 +63,8 @@ export function PieChart({
         ]}
         colors={{ datum: "data.color" }}
         arcLinkLabelsStraightLength={0}
+        arcLinkLabelsColor="#1777FF"
+        arcLinkLabelsTextColor="#1777FF"
         arcLinkLabelsDiagonalLength={36}
         margin={{
           bottom: 80,
