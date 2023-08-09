@@ -3,9 +3,6 @@
   text-align: center;
 }
 
-#app-root.light {
-}
-
 body {
   margin: 0px;
 }
@@ -18,9 +15,18 @@ body {
   color: white;
 }
 
+#app-root.dark .ant-pagination-item a {
+  color: white;
+}
+
 #app-root.dark text {
   color: white;
 }
+
 #app-root.dark .ant-progress-inner {
   background-color: white;
+}
+
+#app-root.dark svg > g > text {
+  fill: white;
 }

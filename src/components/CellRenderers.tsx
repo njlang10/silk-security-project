@@ -49,7 +49,7 @@ export function SeverityCellRenderer(value: Severity): React.ReactNode {
         background: getColorForSeverity(value),
         width: "100%",
         height: "100%",
-        color: "white",
+        color: "black",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

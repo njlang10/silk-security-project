@@ -75,17 +75,22 @@ export default function App() {
         <Typography.Title level={5} style={{ margin: 0, paddingTop: 10 }}>
           Grouped Findings Dashboard
         </Typography.Title>
-        <Switch
-          onChange={() =>
-            setDisplayMode((prev) => {
-              if (prev === "light") {
-                return "dark";
-              }
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <Typography.Text>
+            {displayMode === "light" ? "To Dark Mode" : "To Light Mode"}
+          </Typography.Text>
+          <Switch
+            onChange={() =>
+              setDisplayMode((prev) => {
+                if (prev === "light") {
+                  return "dark";
+                }
 
-              return "light";
-            })
-          }
-        />
+                return "light";
+              })
+            }
+          />
+        </div>
       </Row>
       <div
         style={{
