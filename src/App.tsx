@@ -5,8 +5,15 @@ import { Row, Typography } from "antd";
 import { PieChart } from "./components/PieChart";
 import { GroupedFindingTable } from "./components/GroupedFindingsTable";
 import { Severity, GroupedFinding, getColorForSeverity } from "./db/data_utils";
+import { Switch } from "antd";
 import grouped from "./db/grouped_findings.json";
 import logo from "./assets/silk.png";
+
+/**
+ * - remove underscores and make column headers nicer to look at
+ */
+
+type DisplayMode = "light" | "dark";
 
 /**
  * APP ENTRY POINT!
@@ -18,6 +25,7 @@ export default function App() {
   );
   const [showPieDirections, setShowPieDirections] = useState<boolean>(false);
   const [groupedFindings, setGroupedFindings] = useState<GroupedFinding[]>([]);
+  const [displayMode, setDisplayMode] = useState<DisplayMode>("light");
 
   // Derived State
   const findingsAnalyzed = useMemo(() => {
@@ -58,7 +66,7 @@ export default function App() {
   }
 
   return (
-    <div className="App">
+    <div id="app-root" className={displayMode === "light" ? "light" : "dark"}>
       <Row justify={"space-between"}>
         <img
           src={logo}
@@ -67,6 +75,17 @@ export default function App() {
         <Typography.Title level={5} style={{ margin: 0, paddingTop: 10 }}>
           Grouped Findings Dashboard
         </Typography.Title>
+        <Switch
+          onChange={() =>
+            setDisplayMode((prev) => {
+              if (prev === "light") {
+                return "dark";
+              }
+
+              return "light";
+            })
+          }
+        />
       </Row>
       <div
         style={{

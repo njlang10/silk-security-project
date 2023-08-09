@@ -1,5 +1,6 @@
 import React from "react";
 import { Severity, getColorForSeverity } from "../db/data_utils";
+import { Progress } from "antd";
 
 export function UrlCellRenderer(value: string): React.ReactNode {
   return (
@@ -19,6 +20,26 @@ export function DescriptionCellRenderer(value: string): React.ReactNode {
   );
 }
 
+export function ProgressCellRenderer(value: string): React.ReactNode {
+  const roundedNumber = Math.round(parseFloat(value) * 100);
+
+  // <= 25% RED, > 25% <=50% ORANGE, >50% <=75% YELLOW, >75% GREEN
+  let colorPicker = "red";
+  if (roundedNumber > 25 && roundedNumber <= 50) {
+    colorPicker = "orange";
+  }
+
+  if (roundedNumber > 50 && roundedNumber <= 75) {
+    colorPicker = "yellow";
+  }
+
+  if (roundedNumber > 75) {
+    colorPicker = "green";
+  }
+
+  return <Progress percent={roundedNumber} strokeColor={colorPicker} />;
+}
+
 export function SeverityCellRenderer(value: Severity): React.ReactNode {
   return (
     <span
@@ -36,3 +57,7 @@ export function SeverityCellRenderer(value: Severity): React.ReactNode {
     </span>
   );
 }
+
+// export function DateCellRenderer(value: string): React.ReactNode {
+
+// }
