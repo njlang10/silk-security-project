@@ -11,11 +11,16 @@ body {
 }
 
 #app-root.dark
-  :not(button):not(.ant-switch-inner):not(.ant-switch-handle):not(a) {
+  :not(button):not(.ant-switch-inner):not(.ant-switch-handle):not(a):not(
+    .ant-progress-inner
+  ) {
   background-color: #151515;
   color: white;
 }
 
 #app-root.dark text {
   color: white;
+}
+#app-root.dark .ant-progress-inner {
+  background-color: white;
 }

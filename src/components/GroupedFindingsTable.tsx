@@ -6,6 +6,8 @@ import {
   DescriptionCellRenderer,
   SeverityCellRenderer,
   ProgressCellRenderer,
+  DateCellRenderer,
+  StatusCellRenderer,
 } from "./CellRenderers";
 import {
   GroupedFinding,
@@ -14,25 +16,8 @@ import {
   getSeveritySort,
 } from "../db/data_utils";
 import type { ColumnsType, ColumnType } from "antd/es/table";
+import { dbStringToHumanReadableString } from "../utils/StringUtils";
 import raw from "../db/raw_findings.json";
-
-function prettyColumnHeader(header: string): string {
-  const replacedUnderscore = header.replace(/_/g, " ");
-  const withCapital = replacedUnderscore.split(" ").map((word) => {
-    const firstLetter = word[0].toLocaleUpperCase();
-    const allOtherLetters = word.slice(1);
-    return firstLetter + allOtherLetters;
-  });
-
-  return withCapital.join(" ");
-}
-/**
- *
- * - Dates are not PRETTY (Trunc these to day)
- * - Convert anything that looks like a code enum into a nice looking string
- * - Progress is overkill in our precision, we probably just need a percentage
- *
- */
 
 const GROUPED_FINDING_TABLE_COLUMNS: ColumnsType<GroupedFinding> = [
   "severity",
@@ -41,13 +26,12 @@ const GROUPED_FINDING_TABLE_COLUMNS: ColumnsType<GroupedFinding> = [
   "sla",
   "status",
   "progress",
-  "id",
   "grouping_type",
   "grouping_key",
   "security_analyst",
   "workflow",
 ].map((key) => ({
-  title: prettyColumnHeader(key),
+  title: dbStringToHumanReadableString(key),
   dataIndex: key,
   key,
   filters: getFilterForKey(key as keyof GroupedFinding),
@@ -56,7 +40,6 @@ const GROUPED_FINDING_TABLE_COLUMNS: ColumnsType<GroupedFinding> = [
 }));
 
 const RAW_FINDINGS_TABLE_COLUMNS: ColumnsType<RawFinding> = [
-  "id",
   "source_security_tool_name",
   "source_security_tool_id",
   "source_collaboration_tool_name",
@@ -69,9 +52,8 @@ const RAW_FINDINGS_TABLE_COLUMNS: ColumnsType<RawFinding> = [
   "status",
   "remediation_url",
   "remediation_text",
-  "grouped_finding_id",
 ].map((key) => ({
-  title: prettyColumnHeader(key),
+  title: dbStringToHumanReadableString(key),
   dataIndex: key,
   key,
   render: getRawFindingCellRenderer(key as keyof RawFinding),
@@ -187,6 +169,11 @@ function getGroupedFindingCellRenderer(
       return DescriptionCellRenderer;
     case "progress":
       return ProgressCellRenderer;
+    case "grouped_finding_created":
+    case "sla":
+      return DateCellRenderer;
+    case "status":
+      return StatusCellRenderer;
   }
 
   return undefined;
@@ -198,6 +185,11 @@ function getRawFindingCellRenderer(
   switch (key) {
     case "remediation_url":
       return UrlCellRenderer;
+    case "finding_created":
+    case "ticket_created":
+      return DateCellRenderer;
+    case "status":
+      return StatusCellRenderer;
   }
 
   return undefined;

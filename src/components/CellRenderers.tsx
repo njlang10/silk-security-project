@@ -1,6 +1,8 @@
 import React from "react";
 import { Severity, getColorForSeverity } from "../db/data_utils";
 import { Progress } from "antd";
+import { format, parseISO } from "date-fns";
+import { dbStringToHumanReadableString } from "../utils/StringUtils";
 
 export function UrlCellRenderer(value: string): React.ReactNode {
   return (
@@ -58,6 +60,11 @@ export function SeverityCellRenderer(value: Severity): React.ReactNode {
   );
 }
 
-// export function DateCellRenderer(value: string): React.ReactNode {
+export function DateCellRenderer(value: string): React.ReactNode {
+  const formatted = format(parseISO(value), "MMMM d, yyyy");
+  return <div>{formatted}</div>;
+}
 
-// }
+export function StatusCellRenderer(value: string): React.ReactNode {
+  return dbStringToHumanReadableString(value);
+}
