@@ -11,7 +11,7 @@ body {
   :not(button):not(.ant-switch-inner):not(.ant-switch-handle):not(a):not(
     .ant-progress-inner
   ) {
-  background-color: #151515;
+  background-color: #252525;
   color: white;
 }
 

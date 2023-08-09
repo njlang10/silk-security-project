@@ -9,10 +9,6 @@ import { Switch } from "antd";
 import grouped from "./db/grouped_findings.json";
 import logo from "./assets/silk.png";
 
-/**
- * - remove underscores and make column headers nicer to look at
- */
-
 type DisplayMode = "light" | "dark";
 
 /**
@@ -70,7 +66,12 @@ export default function App() {
       <Row justify={"space-between"}>
         <img
           src={logo}
-          style={{ height: "50px", width: "100px", top: "25px" }}
+          style={{
+            height: "50px",
+            width: "100px",
+            top: "25px",
+            background: "white",
+          }}
         />
         <Typography.Title level={5} style={{ margin: 0, paddingTop: 10 }}>
           Grouped Findings Dashboard
